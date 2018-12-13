@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+     <!-- 配置c3p0连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <!-- 注入属性值 -->
+        <property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+        <!-- 如果不在此配置数据库的字符集，hibernateTemplate保存数据时会出现中文乱码 -->
+        <property name="jdbcUrl" value="jdbc:mysql:///ssh_crm?useUnicode=true&amp;characterEncoding=utf-8"></property>
+        <property name="user" value="root"></property>
+        <property name="password" value="root"></property>
+        <!-- <property name="useUnicode" value="true"></property>
+        <property name="characterEncoding" value="utf-8"></property> -->
+    </bean>
+
+    <!-- spring管理sessionFactory -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+
+        <!-- 配置hibernate基本信息 -->
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+            </props>
+        </property>
+
+        <!-- 配置映射文件 .hbm.xml -->
+        <property name="mappingResources">
+            <list>
+                <value>entity/User.hbm.xml</value>
+                <value>entity/Customer.hbm.xml</value>
+                <value>entity/LinkMan.hbm.xml</value>
+                <value>entity/Visit.hbm.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 开启事务 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+    <!-- 开启事务注解，然后需要在service类上添加注解 @Transactional -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!-- Spring配置的Bean默认为单例模式，在此通过scope属性配置action为多例 -->
+    <bean id="userAction" class="action.UserAction" scope="prototype">
+        <property name="userService" ref="userService"></property>
+    </bean>
+
+    <bean id="userService" class="service.UserService">
+        <property name="userDao" ref="userDaoImpl"></property>
+    </bean>
+
+    <bean id="userDaoImpl" class="dao.impl.UserDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+    <import resource="classpath:customer.xml"/> 
+    <import resource="classpath:linkman.xml"/> 
+    <import resource="classpath:visit.xml"/> 
+</beans>

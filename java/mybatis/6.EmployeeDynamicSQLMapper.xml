@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.batis.mapper.EmployeeDynamicSQLMapper">
+<!-- 
+	if
+	choose(when, otherwise) 分支选择，带了 break的switch-case
+		如果带了id，就用id查；如果带了lastName就用lastName查。只会进入其中一个
+	trim 字符截取(where, set)
+	foreach
+ -->	
+ <!-- 查询员工，要求携带列哪个字段查询条件就带着这个字段
+ 	   查询的时候如果某些条件可能
+ 	   1. where 1=1 and
+ 	   2. <where></where>把所有的查询条件都包括在内，
+ 	   mybatis就会将 and/or移除, and需要放在前面
+ 
+  -->
+ <!-- public List<Employee> getEmpByConditionIf(Employee employee); -->
+ 
+ 	<select id="getEmpByConditionIf" resultType="com.batis.test.Employee">
+ 		select * from tbl_employee
+ 		<!-- test:判断表达式 OGNL
+ 			OGNL可参考官方文档
+ 			从参数取值进行判断
+ 		 -->
+ 		<where>
+			<if test="id != null">
+				id=#{id}
+			</if>
+			
+			<if test="lastName != null and lastName != ''">
+				and last_name like #{lastName}
+			</if>
+			
+			<if test="email != null and email.trim() != &quot;&quot;">
+				and last_name like #{email}
+			</if>
+			<!-- OGNL会进行字符串与数字的转换判断  "0"==0-->
+			<if test="gender==0 or gender==1">
+				and gender=#{gender}
+			</if>
+ 		</where>
+ 	</select>
+ 	
+ 	<!-- public List<Employee> getEmpByConditionTrim(Employee employee); -->
+ 	<select id="getEmpByConditionTrim" resultType="com.batis.test.Employee">
+ 		select * from tbl_employee  
+ 		<!-- 后面多出的 and或者or  where标签不能解决
+ 			1. prefix="" 前缀，trim标签中整个字符串拼串后的结果加一个前缀
+ 			2. prefixOverrides="" 前缀覆盖，去掉整个字符串前面多余的字符
+ 			3. suffix="" trim标签中整个字符串拼串后的结果加一个后缀
+ 			4. uffixOverrides=" 后缀覆盖
+ 		 -->
+ 		<trim prefix="where" suffixOverrides="and">
+ 			<if test="id != null">
+				id=#{id} and
+			</if>
+			
+			<if test="lastName != null and lastName != ''">
+				last_name like #{lastName} and
+			</if>
+			
+			<if test="email != null and email.trim() != &quot;&quot;">
+				last_name like #{email} and
+			</if>
+			<!-- OGNL会进行字符串与数字的转换判断  "0"==0-->
+			<if test="gender==0 or gender==1">
+				gender=#{gender}
+			</if>
+		</trim>
+ 	</select>
+ 	
+ 	<!-- public List<Employee> getEmpByConditionChoose(Employee employee); -->
+ 	<select id="getEmpByConditionChoose" resultType="com.batis.test.Employee">
+ 		select * from tbl_employee
+ 		<where>
+ 			<choose>
+ 				<when test="id!=null">
+ 					id=#{id}
+ 				</when>
+ 				<when test="lastName!=null">
+ 					last_name like #{lastName}
+ 				</when>
+ 				<otherwise>
+ 					gender=1
+ 				</otherwise>
+ 			</choose>
+ 		</where>
+ 	</select>
+ 	
+ 	<!-- set与if 结合， 动态更新 -->
+ 	<!-- public void updateEmp(Employee emp); -->
+ 	<update id="updateEmp">
+ 		update tbl_employee
+ 		<!-- 帮助去掉后面的 , -->
+ 		<set>
+ 		<if test="lastName != null">
+ 			last_name=#{lastName},
+ 		</if>
+ 		<if test="email != null">
+ 			email=#{email},
+ 		</if>
+ 		<if test="gender != null">
+ 			gender=#{gender},
+ 		</if>
+		 <if test="dept.id!=null">
+ 			dept_id=#{dept.id}
+ 		</if>
+ 		</set>
+ 		where id=#{id}
+ 	</update>
+ 	
+ 	<!-- public List<Employee> getEmpsByConditionForeach(List<Integer> ids); -->
+ 	<select id="getEmpsByConditionForeach" resultType="com.batis.test.Employee">
+ 		select * from tbl_employee where id in
+ 		<!-- 
+ 			collection: 指定要遍历的集合(list, array)
+ 			list 类型的参数会特殊处理封装在map中，map的key就叫list
+ 			item 将当前遍历出的元素赋值给指定的文章
+ 			
+ 			#{变量名} 取出变量的值，也就是当前遍历出的元素
+ 			separator 元素之间的分隔符
+ 			open 遍历出所有结果拼接一个开始的字符
+ 			close 遍历出所有的结果拼接一个结束的字符
+ 			index 索引，遍历list的时候是索引， item就是值
+ 					  遍历map的时候index是map的key， item就是map的值;
+ 		 -->
+ 		<foreach collection="list" item="item_id" separator=","
+ 			open="(" close=")">
+ 			#{item_id}
+ 		</foreach>
+ 	</select>
+ 	
+ 	<!-- 批量保存 public void addEmps(@Param("emps")List<Employee> emps); -->
+ 	<!-- MySQL下批量保存，可以foreach遍历 。 mysql支持values(),() -->
+ 	<insert id="addEmps">
+<!--  		insert into tbl_employee (last_name, email, gender, dept_id)
+ 		values
+ 		<foreach collection="emps" item="emp" separator=",">
+ 			(#{emp.lastName}, #{emp.email}, #{emp.gender}, #{emp.dept.id})
+ 		</foreach> -->
+ 		<!-- 这种方式需要设置数据库 allowMultiQueries=true 
+ 			  分号分隔多个sql可以用于其他的批量操作(删除 修改)-->
+ 		<foreach collection="emps" item="emp" separator=";">
+ 		insert into tbl_employee (last_name, email, gender, dept_id)
+ 		values (#{emp.lastName}, #{emp.email}, #{emp.gender}, #{emp.dept.id})
+ 		</foreach>
+ 	</insert>
+ 	
+ 	<!-- 两个内置参数： 不只是方法传递过来的参数可以被用来判断，取值
+ 		 mybatis默认还内置2个参数
+ 		 _parameter: 代表整个参数
+ 		 	单个参数: _parameter就是这个参数
+ 		 	多个参数：参数会被封装为一个map: _parameter就是代表这个map
+ 		 	
+ 		 _databaseId: 如果配置了databaseIdProvider标签
+ 		 	_databaseId: 代表来当前数据库的别名
+ 	 -->
+ 	 
+ 	 <!-- public List<Employee> getEmpsTestInnerParameter(Employee employee); -->
+ 	 <select id="getEmpsTestInnerParameter" resultType="com.batis.test.Employee">
+ 	 	<!-- bind 可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量值 -->
+ 	 	<bind name="_lastName" value="%+lastName+%"/>
+ 	 	<if test="_databaseId==mysql">
+ 	 		select * from tbl_employee
+ 	 		<if test="_parameter != null">
+ 	 			where last_name = #{parameter.lastName} <!-- 也可以是 #{lastName} -->
+ 	 			where last_name = #{_lastName} <!-- bind绑定测试 -->
+ 	 		</if>
+		</if>
+		<if test="_databaseId==oracal">
+ 	 		select * from employees
+		</if>
+ 	 </select>
+ 	 
+ 	 <!-- sql抽取可重用字段 <include refid="insertColumn"> 引用外部定义 
+ 	 	  1. sql 抽取： 经常将要查询的列名，或者插入用的列名抽取出来方便引用
+ 	 	  2. include来引用已经抽取的sql
+ 	 	  3. include还可以自定义一些property, sql标签内部就能使用自定义属性 ${prop}
+ 	 	  #{}不能使用
+ 	 -->
+ 	 
+ 	 <sql id="insertColumn">
+ 	 	last_name, email, gender, dept_id
+ 	 </sql>
+</mapper>
