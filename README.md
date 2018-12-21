@@ -7,6 +7,8 @@
 3. [SqlHelp类，JDBC的基本操作](java/1.2_SqlHelper.java)
 4. [Java注解](java/1.3_annotation.md)
 5. [Class.getResource](java/1.4_getResource.md)
+6. [java数据类型及转换](java/3.1_javatype.png)
+7. []()
 
 ### 【Spring】
 1. [Maven命令创建spring工程](java/spring/1_maven_spring.md) 
@@ -56,6 +58,7 @@
 1. [Maven Scope属性](tools/maven/1.scope.md)
 2. [Maven Setting](tools/maven/2.config.md)
 3. [Nginx入门](tools/nginx/1.1_nginx.md)
+4. [Git配置信息](tools/git/1.config.md)
 
 ### 【Ubuntu】
 1. [Ubuntu Gnome安装](linux/1.1_linux_install.md)

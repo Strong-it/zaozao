@@ -1,0 +1,225 @@
+写出程序结果
+class Demo{	
+	public static void func(){
+		try{
+			throw  new Exception();
+		}
+		finally{
+			System.out.println("B");
+		}
+	}
+	public static void main(String[] args){
+		try{
+			func();
+			System.out.println("A");
+		}
+		catch(Exception e){
+			System.out.println("C");
+		}
+		System.out.println("D");
+	}
+}
+
+【答案】
+
+
+//编译不通过
+编译失败：
+如果func放上声明了该异常。结果是？B C D
+--------------------------------------------------
+写出程序结果	
+class Demo{
+	public static void main(String[] args){
+		try{
+			showExce(); 
+			System.out.println("A");
+		}
+		catch(Exception e){
+			System.out.println("B");
+		}
+		finally{
+			System.out.println("C");
+		}
+		System.out.println("D");
+	}
+	public static void showExce()throws Exception{
+		throw new Exception();
+	}
+}
+
+【答案】
+
+//BCD
+
+--------------------------------------------------
+写出程序结果：
+class Demo{	
+	public static void func(){
+		try{
+			throw  new Exception();
+			System.out.println("A");
+		}
+		catch(Exception e){
+			System.out.println("B");
+		}
+	}
+	public static void main(String[] args){
+		try{
+			func();
+		}
+		catch(Exception e){
+			System.out.println("C");
+		}
+		System.out.println("D");
+	}
+}
+
+【答案】
+
+//编译失败。 因为打印“A”的输出语句执行不到。
+throw单独存在，下面不要定义语句，因为执行不到。
+--------------------------------------------------
+写出程序结果
+class Exc0 extends Exception{}
+class Exc1 extends Exc0{}
+
+class Demo{
+	public static void main(String[] args){
+		try{
+			throw new Exc1();
+		}		
+		catch(Exception e){
+			System.out.println("Exception");
+		}
+		catch(Exc0 e){
+			System.out.println("Exc0");
+		}
+	}
+}
+
+【答案】
+
+编译不通过！
+多个catch时，父类的catch要放在下面。
+
+--------------------------------------------------
+写出程序结果	
+class Test{ 
+	public static String output=""; 
+	public static void foo(int i){ 
+		try{ 
+			if(i==1)
+				throw new Exception(); 	
+			output+="1"; 
+		} 
+		catch(Exception e){ 
+			output+="2"; 
+			//return; 
+		} 
+		finally{ 
+			output+="3"; 
+		} 
+		output+="4"; 
+	}
+	public static void main(String args[]){ 
+		foo(0);
+		System.out.println(output);//
+		foo(1); 
+		System.out.println(output);// 
+	}
+}
+  【答案】
+
+  //134
+  //134234
+
+--------------------------------------------------
+public class ReturnExceptionDemo {
+	static void methodA() {
+		try {
+			System.out.println("进入方法A");
+			throw new RuntimeException("制造异常");
+		} finally {
+			System.out.println("用A方法的finally");
+		}
+	}
+
+	static int methodB() {
+		try {
+			System.out.println("进入方法B");
+			// throw new Exception();
+			return 1;
+		} catch (Exception e) {
+			return 3;
+		} finally {
+			System.out.println("调用B方法的finally");
+			// return 2;
+		}
+	}
+
+	public static void main(String[] args) {
+		try {
+			methodA();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		int i = methodB();
+		System.out.println(i);
+	}
+}
+
+【答案】
+
+进入方法A
+用A方法的finally
+制造异常
+进入方法B
+调用B方法的finally
+1
+--------------------------------------------------
+
+try {}里有一个return语句，那么紧跟在这个try后的finally {}里的code会不会被执行，什么时候被执行，在return前还是后
+答：会执行，在return前执行
+
+
+--------------------------------------------------
+给我一个你最常见到的runtime exception
+答：常见的运行时异常有如下这些ArithmeticException, ArrayStoreException, 
+BufferOverflowException, BufferUnderflowException, CannotRedoException, 
+CannotUndoException, ClassCastException, CMMException, ConcurrentModificationException,
+DOMException, EmptyStackException, IllegalArgumentException, IllegalMonitorStateException, 
+IllegalPathStateException, IllegalStateException, ImagingOpException, 
+IndexOutOfBoundsException, MissingResourceException, NegativeArraySizeException, 
+NoSuchElementException, NullPointerException, ProfileDataException, ProviderException, 
+RasterFormatException, SecurityException, SystemException, UndeclaredThrowableException, 
+UnmodifiableSetException, UnsupportedOperationException
+--------------------------------------------------
+error和exception有什么区别
+答：error 表示恢复不是不可能但很困难的情况下的一种严重问题。比如说内存溢出。不可能指望程序能处理这样的情况
+    exception 表示一种设计或实现问题。也就是说，它表示如果程序运行正常，从不会发生的情况
+
+--------------------------------------------------
+  public  int aaa(){
+	int x=1;
+			
+		try{
+			return ++x;
+		}catch(Exception e){
+				
+		}finally{
+			++x;		
+		}
+		//System.out.println("atguigu");
+		return x;	
+   }
+	
+public static void main(String[] args) {
+	Test t= new Test();
+	int y=t.aaa();
+	System.out.println(y);
+}
+打印结果是？
+【答案】
+
+//2
+考虑把最后的return x写到finally里面结果就不同了。是3.
