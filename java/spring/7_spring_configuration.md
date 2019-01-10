@@ -67,4 +67,8 @@ public class WebConfig {}
 @Import(TestConfiguration.class)
 public class WebConfig {}
 ```
+
+### XML中引入javaconfig文件
+`<bean class="soundsystem.CDConfig">`
+
 > 内容来自： https://www.cnblogs.com/duanxz/p/7493276.html

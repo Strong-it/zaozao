@@ -1,6 +1,6 @@
 ## AOP注解配置
 * AOP: 是一种新的方法论，是对传统OOP的补充
-* 切面(Aspect): 横切关注点(扩月应用程序多个模块的功能)被模块化的特殊对象
+* 切面(Aspect): 横切关注点(扩展应用程序多个模块的功能)被模块化的特殊对象
 * 通知(Advice): 切面需要完成的工作
 * 目标(Target): 被通知的对象
 * 代理(Proxy): 向目标对象应用通知之后创建的对象
@@ -94,7 +94,7 @@ public class LoggingAspect {
 1. * \<!-- 配置bean -->
    *  `<bean id="calculator" class=""></bean>`
 2. * \<1-- 配置切面的bean ---> 
-   * `<bean id="validationAspect" = class="">`
+   * `<bean id="validationAspect" class="">`
 3. * \<!-- 配置AOP --->
 ```
 <!-- 配置普通的bean -->
